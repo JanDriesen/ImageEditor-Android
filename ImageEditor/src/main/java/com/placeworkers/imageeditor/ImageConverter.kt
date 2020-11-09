@@ -15,9 +15,11 @@ object ImageConverter {
         return byteArrayToImage(base64ByteArray)
     }
 
-    // creates a base64 encoded string from an image
-    fun base64StringFromImage(image: Bitmap): String {
-        val imageByteArray = imageToByteArray(image)
+    /**
+     * Some cool extension function.
+     */
+    fun Bitmap.toBase64String() : String {
+        val imageByteArray = imageToByteArray(this)
         return byteArrayToBase64String(imageByteArray)
     }
 
