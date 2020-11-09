@@ -1,0 +1,3 @@
+include ':ImageEditor'
+include ':app'
+rootProject.name = "Image Drawer"
