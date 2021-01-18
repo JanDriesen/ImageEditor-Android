@@ -1,5 +1,6 @@
 package com.placeworkers.imageeditor.views
 
+
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
@@ -9,9 +10,10 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+
 import android.widget.Toast
 import com.placeworkers.imageeditor.utils.ImageConverterUtil
-
+import com.placeworkers.imageeditor.utils.ImageConverterUtil.toBase64
 
 @SuppressLint("AppCompatCustomView")
 class DrawableImageView: ImageView, View.OnTouchListener {
@@ -49,6 +51,15 @@ class DrawableImageView: ImageView, View.OnTouchListener {
 
     private fun mInit() {
         setOnTouchListener(this)
+
+        scaleType = ScaleType.CENTER_INSIDE
+
+        // initialize the lateinit variables to prevent crashes
+        path = Path()
+        editImageMatrix = Matrix()
+        originalImage = Bitmap.createBitmap(context.resources.displayMetrics.widthPixels,context.resources.displayMetrics.heightPixels, Bitmap.Config.ARGB_8888)
+        mCanvas = Canvas(originalImage)
+        paint = Paint()
     }
 
     fun setBase64Image(base64: String?) {
@@ -60,13 +71,15 @@ class DrawableImageView: ImageView, View.OnTouchListener {
     }
 
     fun setImageURL(urlPath: String) {
+        Log.d("DrawableImageView.kt", "setImageURL() URL: $urlPath")
+
         val bitmap = ImageConverterUtil.getBitmapFromPath(urlPath)
         if (bitmap!= null) {
             val alteredBitmap = Bitmap.createBitmap(bitmap.width, bitmap.height, bitmap.config)
             setNewImage(alteredBitmap, bitmap)
         } else {
             Toast.makeText(context, "Failed to load the file from path", Toast.LENGTH_LONG).show()
-            setBackgroundColor(Color.rgb(255, 0, 0));
+            mCanvas = Canvas(Bitmap.createBitmap(0,0, Bitmap.Config.ARGB_8888))
         }
     }
 
@@ -111,6 +124,11 @@ class DrawableImageView: ImageView, View.OnTouchListener {
         combineCanvas.drawBitmap(drawnBitmap!!, 0F, 0F, paint)
 
         return combineBitmap
+    }
+
+    fun exportBitmapAsBase64(): String {
+        val exportedBitmap = exportBitmap()
+        return exportedBitmap.toBase64()
     }
 
     private fun touch_start(x: Float, y: Float) {
