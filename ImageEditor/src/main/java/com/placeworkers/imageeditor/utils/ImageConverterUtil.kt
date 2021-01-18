@@ -1,13 +1,16 @@
 package com.placeworkers.imageeditor.utils
 
+import android.R.attr
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
+import android.media.ExifInterface
 import android.util.Base64
 import java.io.ByteArrayOutputStream
 import java.io.File
 import java.io.InputStream
+
 
 // Manages the converting from an image to a string and vice versa
 object ImageConverterUtil {
@@ -20,6 +23,10 @@ object ImageConverterUtil {
                 base64
             )
         return base64ByteArray.toBitmap()
+    }
+
+    fun base64FromImage(bitmap: Bitmap): String {
+        return bitmap.toBase64()
     }
 
     /**
@@ -50,6 +57,12 @@ object ImageConverterUtil {
         return resizedBitmap
     }
 
+    fun Bitmap.rotatedBy(angle: Float): Bitmap {
+        val matrix = Matrix()
+        matrix.postRotate(angle)
+        return Bitmap.createBitmap(this, 0, 0, width, height, matrix, true)
+    }
+
     private fun ByteArray.toBitmap(): Bitmap? = BitmapFactory.decodeByteArray(this, 0, this.size)
 
     // base64 string to ByteArray and vice versa
@@ -60,8 +73,20 @@ object ImageConverterUtil {
     fun getBitmapFromPath(urlPath: String): Bitmap? {
         val file = File(urlPath)
         if (file.exists()) {
-            return BitmapFactory.decodeFile(file.absolutePath)
 
+            val exifInterface = ExifInterface(urlPath)
+            val orientation = exifInterface.getAttributeInt(
+                ExifInterface.TAG_ORIENTATION,
+                ExifInterface.ORIENTATION_UNDEFINED)
+
+            val bitmap = BitmapFactory.decodeFile(file.absolutePath)
+
+            return when (orientation) {
+                ExifInterface.ORIENTATION_ROTATE_90 -> bitmap.rotatedBy(90.0F)
+                ExifInterface.ORIENTATION_ROTATE_180 -> bitmap.rotatedBy(180.0F)
+                ExifInterface.ORIENTATION_ROTATE_270 -> bitmap.rotatedBy(270.0F)
+                else -> bitmap
+            }
         } else return null
     }
 
