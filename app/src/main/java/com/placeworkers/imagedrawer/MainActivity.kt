@@ -28,29 +28,21 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
+        // get the mountain image from the app modules "assets" resources
+        // saved in assets to get no distractions from the scaling which comes from the density of a drawable folder (hdpi, xhdpi, xxhdpi etc.)
         resourcesBitmap = ImageConverterUtil.getBitmapFromAssets(baseContext, "mountains.jpg")!!
 
         // get a base64 string representation of the bitmap
+        // .toBase64() function is a extension function and comes with the ImageEditor lib
         base64Image = resourcesBitmap.toBase64()
 
-
+        // create a copy of the image which can be edited
         alteredBitmap = Bitmap.createBitmap(resourcesBitmap.width, resourcesBitmap.height, resourcesBitmap.config)
 
-//        imageView.setBase64Image(base64Image)
+        // set a new image on the imageView to draw on
+        // imageView variable comes with android magic. its defined in the /res/layout/activiy_main.xml file
+        //  <com.placeworkers.imageeditor.views.DrawableImageView  android:id="@+id/imageView">
         imageView.setNewImage(alteredBitmap, resourcesBitmap)
-
-//        button.setOnClickListener {
-//            // get a bitmap from a base64 string
-//            val timeMeasure = measureTimeMillis {
-//                val bitmap = ImageConverterUtil.imageFromBase64(base64Image)
-//                requireNotNull(bitmap) {
-//                    "Das Base64 darf nicht null sein!"
-//                }
-//                imageView.setImageBitmap(bitmap)
-//            }
-//
-//            Toast.makeText(this as Context, "Successfully converted image. Took: $timeMeasure ms", Toast.LENGTH_LONG).show()
-//        }
     }
 
     private fun drawCircle(bm: Bitmap): Bitmap {
@@ -64,11 +56,13 @@ class MainActivity : AppCompatActivity() {
         return bmOverlay
     }
 
+    // create a menu in the top navigation bar to save and clear images
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_layout, menu)
         return true
     }
 
+    // handle selection of menu items
     override fun onOptionsItemSelected(item: MenuItem) = when (item.itemId) {
         R.id.action_settings -> {
             // User chose the "Settings" item, show the app settings UI...
